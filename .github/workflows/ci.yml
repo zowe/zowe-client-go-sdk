@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21.x'
+
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Tidy root module
+        run: go mod tidy
+
+      - name: Run unit tests (SDK packages)
+        run: go test -v ./pkg/...
+
+      # Integration tests are in a separate repository
+      # Uncomment when integration test repository is available
+      # - name: Tidy integration module
+      #   run: |
+      #     cd integration
+      #     go mod tidy
+      # 
+      # - name: Run integration tests
+      #   run: |
+      #     cd integration
+      #     go test -v ./...
+
+      - name: Run zXplore integration test (if credentials available)
+        if: env.ZXPLORE_HOST != ''
+        env:
+          ZXPLORE_HOST: ${{ secrets.ZXPLORE_HOST }}
+          ZXPLORE_PORT: ${{ secrets.ZXPLORE_PORT }}
+          ZXPLORE_USER: ${{ secrets.ZXPLORE_USER }}
+          ZXPLORE_PASSWORD: ${{ secrets.ZXPLORE_PASSWORD }}
+        run: go run test_zxplore_github.go
+
+

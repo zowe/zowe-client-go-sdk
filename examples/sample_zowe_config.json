@@ -1,0 +1,30 @@
+{
+  "$schema": "./zowe.schema.json",
+  "profiles": {
+    "zosmf": {
+      "type": "zosmf",
+      "properties": {
+        "host": "mainframe.example.com",
+        "port": 443,
+        "user": "myuser",
+        "password": "mypassword",
+        "rejectUnauthorized": true,
+        "basePath": "/zosmf/api/v1",
+        "protocol": "https"
+      },
+      "secure": ["user", "password"]
+    },
+    "global_base": {
+      "type": "base",
+      "properties": {
+        "host": "mainframe.example.com",
+        "rejectUnauthorized": true
+      },
+      "secure": ["user", "password"]
+    }
+  },
+  "defaults": {
+    "zosmf": "zosmf"
+  },
+  "autoStore": true
+} 
