@@ -8,9 +8,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ojuschugh1/zowe-client-go-sdk/pkg/profile"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/zowe/zowe-client-go-sdk/pkg/profile"
 )
 
 // createTestProfile creates a profile for testing with the given server URL
@@ -18,7 +18,7 @@ func createTestProfile(serverURL string) *profile.ZOSMFProfile {
 	// Extract host and port from server URL
 	host := strings.TrimPrefix(serverURL, "http://")
 	host = strings.TrimPrefix(host, "https://")
-	
+
 	return &profile.ZOSMFProfile{
 		Name:               "test",
 		Host:               host,
@@ -73,7 +73,7 @@ func TestNewDatasetManagerFromProfile(t *testing.T) {
 func TestCreateDatasetManager(t *testing.T) {
 	// Create a test profile manager
 	pm := &profile.ZOSMFProfileManager{}
-	
+
 	// This should fail since we don't have a real profile
 	_, err := CreateDatasetManager(pm, "nonexistent")
 	assert.Error(t, err)
@@ -99,7 +99,7 @@ func TestListDatasets(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "GET", r.Method)
 		assert.Equal(t, "/api/v1/restfiles/ds", r.URL.Path)
-		
+
 		// Return mock response matching z/OSMF API format
 		response := DatasetList{
 			Datasets: []Dataset{
@@ -112,7 +112,7 @@ func TestListDatasets(t *testing.T) {
 			ReturnedRows: 1,
 			JSONVersion:  1,
 		}
-		
+
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(response)
 	}))
@@ -137,7 +137,7 @@ func TestGetDataset(t *testing.T) {
 		assert.Equal(t, "GET", r.Method)
 		assert.Equal(t, "/api/v1/restfiles/ds", r.URL.Path)
 		// GetDataset now uses the list API with a filter
-		
+
 		// Return mock response matching z/OSMF API format
 		response := DatasetList{
 			Datasets: []Dataset{
@@ -150,7 +150,7 @@ func TestGetDataset(t *testing.T) {
 			ReturnedRows: 1,
 			JSONVersion:  1,
 		}
-		
+
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(response)
 	}))
@@ -174,15 +174,15 @@ func TestCreateDataset(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "POST", r.Method)
 		assert.Equal(t, "/api/v1/restfiles/ds/TEST.DATA", r.URL.Path)
-		
+
 		// Parse request body
 		var requestBody map[string]interface{}
 		json.NewDecoder(r.Body).Decode(&requestBody)
-		
+
 		// Verify request body
 		assert.Equal(t, "TEST.DATA", requestBody["dsname"])
 		assert.Equal(t, "PS", requestBody["dsorg"])
-		
+
 		w.WriteHeader(http.StatusCreated)
 	}))
 	defer server.Close()
@@ -206,7 +206,7 @@ func TestCreateDataset(t *testing.T) {
 		RecordLength: RecordLength80,
 		BlockSize:    BlockSize800,
 	}
-	
+
 	err = dm.CreateDataset(request)
 	assert.NoError(t, err)
 }
@@ -216,7 +216,7 @@ func TestDeleteDataset(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "DELETE", r.Method)
 		assert.Equal(t, "/api/v1/restfiles/ds/TEST.DATA", r.URL.Path)
-		
+
 		w.WriteHeader(http.StatusNoContent)
 	}))
 	defer server.Close()
@@ -237,15 +237,15 @@ func TestUploadContent(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "PUT", r.Method)
 		assert.Equal(t, "/api/v1/restfiles/ds/TEST.DATA", r.URL.Path)
-		
+
 		// Verify content type
 		assert.Equal(t, "text/plain", r.Header.Get("Content-Type"))
-		
+
 		// Read and verify request body
 		body, err := io.ReadAll(r.Body)
 		require.NoError(t, err)
 		assert.Equal(t, "Hello, World!", string(body))
-		
+
 		w.WriteHeader(http.StatusCreated)
 	}))
 	defer server.Close()
@@ -263,7 +263,7 @@ func TestUploadContent(t *testing.T) {
 		Encoding:    "UTF-8",
 		Replace:     true,
 	}
-	
+
 	err = dm.UploadContent(request)
 	assert.NoError(t, err)
 }
@@ -273,7 +273,7 @@ func TestDownloadContent(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "GET", r.Method)
 		assert.Equal(t, "/api/v1/restfiles/ds/TEST.DATA", r.URL.Path)
-		
+
 		w.Header().Set("Content-Type", "text/plain")
 		w.Write([]byte("Hello, World!"))
 	}))
@@ -290,7 +290,7 @@ func TestDownloadContent(t *testing.T) {
 		DatasetName: "TEST.DATA",
 		Encoding:    "UTF-8",
 	}
-	
+
 	content, err := dm.DownloadContent(request)
 	require.NoError(t, err)
 	assert.Equal(t, "Hello, World!", content)
@@ -301,7 +301,7 @@ func TestListMembers(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "GET", r.Method)
 		assert.Equal(t, "/api/v1/restfiles/ds/TEST.PDS/member", r.URL.Path)
-		
+
 		// Return mock response matching z/OSMF API format
 		response := MemberList{
 			Members: []DatasetMember{
@@ -312,7 +312,7 @@ func TestListMembers(t *testing.T) {
 			ReturnedRows: 1,
 			JSONVersion:  1,
 		}
-		
+
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(response)
 	}))
@@ -336,7 +336,7 @@ func TestGetMember(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "GET", r.Method)
 		assert.Equal(t, "/api/v1/restfiles/ds/TEST.PDS(MEMBER1)", r.URL.Path)
-		
+
 		// Return mock member content (z/OSMF returns member content as text)
 		w.Header().Set("Content-Type", "text/plain")
 		w.Write([]byte("Member content here"))
@@ -360,7 +360,7 @@ func TestDeleteMember(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "DELETE", r.Method)
 		assert.Equal(t, "/api/v1/restfiles/ds/TEST.PDS(MEMBER1)", r.URL.Path)
-		
+
 		w.WriteHeader(http.StatusNoContent)
 	}))
 	defer server.Close()
@@ -381,7 +381,7 @@ func TestExists(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "GET", r.Method)
 		assert.Equal(t, "/api/v1/restfiles/ds", r.URL.Path)
-		
+
 		// Return mock response matching z/OSMF API format
 		response := DatasetList{
 			Datasets: []Dataset{
@@ -393,7 +393,7 @@ func TestExists(t *testing.T) {
 			ReturnedRows: 1,
 			JSONVersion:  1,
 		}
-		
+
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(response)
 	}))
@@ -416,16 +416,16 @@ func TestCopySequentialDataset(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "PUT", r.Method)
 		assert.Equal(t, "/api/v1/restfiles/ds/TARGET.DATA", r.URL.Path)
-		
+
 		// Parse request body
 		var requestBody map[string]interface{}
 		json.NewDecoder(r.Body).Decode(&requestBody)
-		
+
 		// Verify request body structure
 		assert.Equal(t, "copy", requestBody["request"])
 		fromDataset := requestBody["from-dataset"].(map[string]interface{})
 		assert.Equal(t, "SOURCE.DATA", fromDataset["dsn"])
-		
+
 		w.WriteHeader(http.StatusCreated)
 	}))
 	defer server.Close()
@@ -446,17 +446,17 @@ func TestCopyMember(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "PUT", r.Method)
 		assert.Equal(t, "/api/v1/restfiles/ds/TARGET.PDS(MEMBER2)", r.URL.Path)
-		
+
 		// Parse request body
 		var requestBody map[string]interface{}
 		json.NewDecoder(r.Body).Decode(&requestBody)
-		
+
 		// Verify request body structure
 		assert.Equal(t, "copy", requestBody["request"])
 		fromDataset := requestBody["from-dataset"].(map[string]interface{})
 		assert.Equal(t, "SOURCE.PDS", fromDataset["dsn"])
 		assert.Equal(t, "MEMBER1", fromDataset["member"])
-		
+
 		w.WriteHeader(http.StatusCreated)
 	}))
 	defer server.Close()
@@ -477,16 +477,16 @@ func TestRenameDataset(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "PUT", r.Method)
 		assert.Equal(t, "/api/v1/restfiles/ds/NEW.DATA", r.URL.Path)
-		
+
 		// Parse request body
 		var requestBody map[string]interface{}
 		json.NewDecoder(r.Body).Decode(&requestBody)
-		
+
 		// Verify request body structure
 		assert.Equal(t, "rename", requestBody["request"])
 		fromDataset := requestBody["from-dataset"].(map[string]interface{})
 		assert.Equal(t, "OLD.DATA", fromDataset["dsn"])
-		
+
 		w.WriteHeader(http.StatusCreated)
 	}))
 	defer server.Close()
@@ -532,11 +532,11 @@ func TestCreateSequentialDataset(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "POST", r.Method)
 		assert.Equal(t, "/api/v1/restfiles/ds/TEST.SEQ", r.URL.Path)
-		
+
 		// Parse request body
 		var requestBody map[string]interface{}
 		json.NewDecoder(r.Body).Decode(&requestBody)
-		
+
 		// Verify request body
 		assert.Equal(t, "TEST.SEQ", requestBody["dsname"])
 		assert.Equal(t, "PS", requestBody["dsorg"])
@@ -546,7 +546,7 @@ func TestCreateSequentialDataset(t *testing.T) {
 		assert.Equal(t, "V", requestBody["recfm"])
 		assert.Equal(t, float64(256), requestBody["lrecl"])
 		assert.Equal(t, float64(27920), requestBody["blksize"])
-		
+
 		w.WriteHeader(http.StatusCreated)
 	}))
 	defer server.Close()
@@ -567,11 +567,11 @@ func TestCreatePartitionedDataset(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "POST", r.Method)
 		assert.Equal(t, "/api/v1/restfiles/ds/TEST.PDS", r.URL.Path)
-		
+
 		// Parse request body
 		var requestBody map[string]interface{}
 		json.NewDecoder(r.Body).Decode(&requestBody)
-		
+
 		// Verify request body
 		assert.Equal(t, "TEST.PDS", requestBody["dsname"])
 		assert.Equal(t, "PO", requestBody["dsorg"])
@@ -582,7 +582,7 @@ func TestCreatePartitionedDataset(t *testing.T) {
 		assert.Equal(t, "V", requestBody["recfm"])
 		assert.Equal(t, float64(256), requestBody["lrecl"])
 		assert.Equal(t, float64(27920), requestBody["blksize"])
-		
+
 		w.WriteHeader(http.StatusCreated)
 	}))
 	defer server.Close()
@@ -603,15 +603,15 @@ func TestUploadText(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "PUT", r.Method)
 		assert.Equal(t, "/api/v1/restfiles/ds/TEST.DATA", r.URL.Path)
-		
+
 		// Verify content type
 		assert.Equal(t, "text/plain", r.Header.Get("Content-Type"))
-		
+
 		// Read and verify request body
 		body, err := io.ReadAll(r.Body)
 		require.NoError(t, err)
 		assert.Equal(t, "Hello, World!", string(body))
-		
+
 		w.WriteHeader(http.StatusCreated)
 	}))
 	defer server.Close()
@@ -630,17 +630,17 @@ func TestUploadText(t *testing.T) {
 func TestUploadTextToMember(t *testing.T) {
 	// Create test server
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(t, "PUT", r.Method)  // Changed from POST to PUT for members
+		assert.Equal(t, "PUT", r.Method) // Changed from POST to PUT for members
 		assert.Equal(t, "/api/v1/restfiles/ds/TEST.PDS(MEMBER1)", r.URL.Path)
-		assert.Equal(t, "text/plain", r.Header.Get("Content-Type"))  // Changed from JSON to plain text
-		
+		assert.Equal(t, "text/plain", r.Header.Get("Content-Type")) // Changed from JSON to plain text
+
 		// Read request body as plain text
 		body, err := io.ReadAll(r.Body)
 		assert.NoError(t, err)
-		
+
 		// Verify request body is plain text
 		assert.Equal(t, "Hello, World!", string(body))
-		
+
 		w.WriteHeader(http.StatusCreated)
 	}))
 	defer server.Close()
@@ -662,7 +662,7 @@ func TestDownloadText(t *testing.T) {
 		assert.Equal(t, "GET", r.Method)
 		assert.Equal(t, "/api/v1/restfiles/ds/TEST.DATA", r.URL.Path)
 		assert.Equal(t, "UTF-8", r.URL.Query().Get("encoding"))
-		
+
 		w.Header().Set("Content-Type", "text/plain")
 		w.Write([]byte("Hello, World!"))
 	}))
@@ -686,7 +686,7 @@ func TestDownloadTextFromMember(t *testing.T) {
 		assert.Equal(t, "GET", r.Method)
 		assert.Equal(t, "/api/v1/restfiles/ds/TEST.PDS(MEMBER1)", r.URL.Path)
 		assert.Equal(t, "UTF-8", r.URL.Query().Get("encoding"))
-		
+
 		w.Header().Set("Content-Type", "text/plain")
 		w.Write([]byte("Hello, World!"))
 	}))
@@ -724,15 +724,15 @@ func TestValidateDatasetName(t *testing.T) {
 
 	// Test invalid names
 	invalidNames := []string{
-		"",                    // Empty
+		"", // Empty
 		"toolongdatasetnamewithwaytoomanycharacters", // Too long
-		"test.data",           // Lowercase
-		"123.DATA",            // Starts with number
-		".DATA",               // Starts with period
-		"DATA.",               // Ends with period
-		"DATA..SET",           // Consecutive periods
-		"DATA--SET",           // Consecutive hyphens
-		"DATA SET",            // Contains space
+		"test.data", // Lowercase
+		"123.DATA",  // Starts with number
+		".DATA",     // Starts with period
+		"DATA.",     // Ends with period
+		"DATA..SET", // Consecutive periods
+		"DATA--SET", // Consecutive hyphens
+		"DATA SET",  // Contains space
 	}
 
 	for _, name := range invalidNames {
@@ -759,14 +759,14 @@ func TestValidateMemberName(t *testing.T) {
 
 	// Test invalid names
 	invalidNames := []string{
-		"",                    // Empty
-		"TOOLONG12",           // Too long (10 characters)
-		"member1",             // Lowercase
-		"123MEMBER",           // Starts with number
-		".MEMBER",             // Starts with period
-		"MEMBER.",             // Ends with period
-		"MEM..BER",            // Consecutive periods
-		"MEM BER",             // Contains space
+		"",          // Empty
+		"TOOLONG12", // Too long (10 characters)
+		"member1",   // Lowercase
+		"123MEMBER", // Starts with number
+		".MEMBER",   // Starts with period
+		"MEMBER.",   // Ends with period
+		"MEM..BER",  // Consecutive periods
+		"MEM BER",   // Contains space
 	}
 
 	for _, name := range invalidNames {
@@ -956,7 +956,7 @@ func TestCreateDatasetError(t *testing.T) {
 		Name: "TEST.DATA",
 		Type: DatasetTypeSequential,
 	}
-	
+
 	err = dm.CreateDataset(request)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "API request failed with status 400")
@@ -1001,7 +1001,7 @@ func TestUploadContentError(t *testing.T) {
 		DatasetName: "TEST.DATA",
 		Content:     "Hello, World!",
 	}
-	
+
 	err = dm.UploadContent(request)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "API request failed with status 409")
@@ -1025,7 +1025,7 @@ func TestDownloadContentError(t *testing.T) {
 	request := &DownloadRequest{
 		DatasetName: "NONEXISTENT",
 	}
-	
+
 	_, err = dm.DownloadContent(request)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "API request failed with status 404")

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/ojuschugh1/zowe-client-go-sdk/pkg/datasets"
-	"github.com/ojuschugh1/zowe-client-go-sdk/pkg/profile"
+	"github.com/zowe/zowe-client-go-sdk/pkg/datasets"
+	"github.com/zowe/zowe-client-go-sdk/pkg/profile"
 )
 
 func main() {
@@ -46,8 +46,8 @@ func demonstrateDatasetManagement(dm *datasets.ZOSMFDatasetManager) {
 	} else {
 		fmt.Printf("   Found %d datasets\n", len(datasetList.Datasets))
 		for _, dataset := range datasetList.Datasets {
-					fmt.Printf("   - %s (%s): %s%% used, size: %s\n", 
-			dataset.Name, dataset.Type, dataset.Used, dataset.SizeX)
+			fmt.Printf("   - %s (%s): %s%% used, size: %s\n",
+				dataset.Name, dataset.Type, dataset.Used, dataset.SizeX)
 		}
 	}
 
@@ -87,7 +87,7 @@ func demonstrateDatasetManagement(dm *datasets.ZOSMFDatasetManager) {
 	// Example 6: Create dataset with custom options
 	fmt.Println("\n6. Creating dataset with custom options:")
 	space := datasets.CreateLargeSpace(datasets.SpaceUnitCylinders)
-	err = dm.CreateDatasetWithOptions("TEST.CUSTOM", datasets.DatasetTypeSequential, space, 
+	err = dm.CreateDatasetWithOptions("TEST.CUSTOM", datasets.DatasetTypeSequential, space,
 		datasets.RecordFormatFixed, datasets.RecordLength132, datasets.BlockSize27920)
 	if err != nil {
 		fmt.Printf("   Error creating custom dataset: %v\n", err)
@@ -221,11 +221,11 @@ func demonstrateDatasetManagement(dm *datasets.ZOSMFDatasetManager) {
 
 	// Example 18: Validation examples
 	fmt.Println("\n18. Validation examples:")
-	
+
 	// Validate dataset names
 	validNames := []string{"TEST.DATA", "USER.PROGRAM", "MY@DATA"}
 	invalidNames := []string{"", "test.data", "123.DATA", "DATA..SET"}
-	
+
 	fmt.Println("   Valid dataset names:")
 	for _, name := range validNames {
 		err := datasets.ValidateDatasetName(name)
@@ -235,7 +235,7 @@ func demonstrateDatasetManagement(dm *datasets.ZOSMFDatasetManager) {
 			fmt.Printf("   - %s: OK\n", name)
 		}
 	}
-	
+
 	fmt.Println("   Invalid dataset names:")
 	for _, name := range invalidNames {
 		err := datasets.ValidateDatasetName(name)
@@ -249,7 +249,7 @@ func demonstrateDatasetManagement(dm *datasets.ZOSMFDatasetManager) {
 	// Validate member names
 	validMembers := []string{"MEMBER1", "PROGRAM", "TEST@1"}
 	invalidMembers := []string{"", "member1", "123MEMBER", "TOOLONG12"}
-	
+
 	fmt.Println("   Valid member names:")
 	for _, name := range validMembers {
 		err := datasets.ValidateMemberName(name)
@@ -259,7 +259,7 @@ func demonstrateDatasetManagement(dm *datasets.ZOSMFDatasetManager) {
 			fmt.Printf("   - %s: OK\n", name)
 		}
 	}
-	
+
 	fmt.Println("   Invalid member names:")
 	for _, name := range invalidMembers {
 		err := datasets.ValidateMemberName(name)
@@ -272,17 +272,17 @@ func demonstrateDatasetManagement(dm *datasets.ZOSMFDatasetManager) {
 
 	// Example 19: Space allocation examples
 	fmt.Println("\n19. Space allocation examples:")
-	
+
 	defaultSpace := datasets.CreateDefaultSpace(datasets.SpaceUnitTracks)
-	fmt.Printf("   Default space: %d/%d %s (dir: %d)\n", 
+	fmt.Printf("   Default space: %d/%d %s (dir: %d)\n",
 		defaultSpace.Primary, defaultSpace.Secondary, defaultSpace.Unit, defaultSpace.Directory)
-	
+
 	largeSpace := datasets.CreateLargeSpace(datasets.SpaceUnitCylinders)
-	fmt.Printf("   Large space: %d/%d %s (dir: %d)\n", 
+	fmt.Printf("   Large space: %d/%d %s (dir: %d)\n",
 		largeSpace.Primary, largeSpace.Secondary, largeSpace.Unit, largeSpace.Directory)
-	
+
 	smallSpace := datasets.CreateSmallSpace(datasets.SpaceUnitKB)
-	fmt.Printf("   Small space: %d/%d %s (dir: %d)\n", 
+	fmt.Printf("   Small space: %d/%d %s (dir: %d)\n",
 		smallSpace.Primary, smallSpace.Secondary, smallSpace.Unit, smallSpace.Directory)
 
 	// Example 20: Close dataset manager

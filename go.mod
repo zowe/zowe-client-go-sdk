@@ -1,4 +1,4 @@
-module github.com/ojuschugh1/zowe-client-go-sdk
+module github.com/zowe/zowe-client-go-sdk
 
 go 1.21
 

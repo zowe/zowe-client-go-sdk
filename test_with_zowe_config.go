@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/ojuschugh1/zowe-client-go-sdk/pkg/datasets"
-	"github.com/ojuschugh1/zowe-client-go-sdk/pkg/jobs"
-	"github.com/ojuschugh1/zowe-client-go-sdk/pkg/profile"
+	"github.com/zowe/zowe-client-go-sdk/pkg/datasets"
+	"github.com/zowe/zowe-client-go-sdk/pkg/jobs"
+	"github.com/zowe/zowe-client-go-sdk/pkg/profile"
 )
 
 func main() {
@@ -40,7 +40,7 @@ func main() {
 
 	// Test basic connectivity
 	fmt.Println("2. Testing basic connectivity...")
-	
+
 	// Test Jobs API - just list jobs
 	jobManager := jobs.NewJobManager(session)
 	defer jobManager.CloseJobManager()

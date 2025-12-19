@@ -5,9 +5,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/ojuschugh1/zowe-client-go-sdk/pkg/datasets"
-	"github.com/ojuschugh1/zowe-client-go-sdk/pkg/jobs"
-	"github.com/ojuschugh1/zowe-client-go-sdk/pkg/profile"
+	"github.com/zowe/zowe-client-go-sdk/pkg/datasets"
+	"github.com/zowe/zowe-client-go-sdk/pkg/jobs"
+	"github.com/zowe/zowe-client-go-sdk/pkg/profile"
 )
 
 func main() {
@@ -53,7 +53,7 @@ func main() {
 	// Test Jobs API
 	fmt.Println(" TESTING JOBS API")
 	fmt.Println("==================")
-	
+
 	jm := jobs.NewJobManager(sess)
 
 	totalTests++
@@ -111,7 +111,7 @@ func main() {
 			fmt.Printf(" PASSED: Found %d members\n", len(members.Members))
 			testsPassed++
 
-			// Test member content download 
+			// Test member content download
 			if len(members.Members) > 0 {
 				totalTests++
 				fmt.Printf(" Download member content (%s)... ", members.Members[0].Name)
@@ -124,7 +124,7 @@ func main() {
 				}
 			}
 
-			// Test member content upload 
+			// Test member content upload
 			totalTests++
 			fmt.Printf(" Upload member content (FINAL)... ")
 			testContent := "//FINAL JOB\n//STEP1 EXEC PGM=IEFBR14\n/*\n"
@@ -186,7 +186,7 @@ func main() {
 		fmt.Println(" PERFECT! ALL TESTS PASSED!")
 		fmt.Println()
 		fmt.Println(" Jobs API: Working")
-		fmt.Println(" Datasets API: Working") 
+		fmt.Println(" Datasets API: Working")
 		fmt.Println(" Members Listing: Working")
 		fmt.Println(" Member Content Download: Working (FIXED)")
 		fmt.Println(" Member Content Upload: Working (FIXED)")

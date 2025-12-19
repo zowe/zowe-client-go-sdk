@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ojuschugh1/zowe-client-go-sdk/pkg/profile"
+	"github.com/zowe/zowe-client-go-sdk/pkg/profile"
 )
 
 // z/OSMF job API endpoints
@@ -27,11 +27,11 @@ const (
 	CancelEndpoint  = "/cancel"
 	PurgeEndpoint   = "/purge"
 	RecordsEndpoint = "/records"
-	
+
 	// File operations
-	JobFilesEndpoint        = "/files"
-	JobFilesByIDEndpoint    = "/files/%s/records"
-	JobFilesJCLEndpoint     = "/files/JCL/records"
+	JobFilesEndpoint     = "/files"
+	JobFilesByIDEndpoint = "/files/%s/records"
+	JobFilesJCLEndpoint  = "/files/JCL/records"
 )
 
 // NewJobManager creates a job manager with the given session
@@ -53,7 +53,7 @@ func NewJobManagerFromProfile(profile *profile.ZOSMFProfile) (*ZOSMFJobManager, 
 // ListJobs gets jobs matching the filter
 func (jm *ZOSMFJobManager) ListJobs(filter *JobFilter) (*JobList, error) {
 	session := jm.session.(*profile.Session)
-	
+
 	// Build query parameters
 	params := url.Values{}
 	if filter != nil {
@@ -139,26 +139,26 @@ func (jm *ZOSMFJobManager) GetJob(correlator string) (*Job, error) {
 		}
 		return jm.GetJobByNameID(jobName, jobID)
 	}
-	
+
 	// If it's just a job ID, we need to find the job first
 	// List jobs and find the one with this job ID
 	jobFilter := &JobFilter{
-		JobID: correlator,
+		JobID:   correlator,
 		MaxJobs: 100, // Get more jobs to find the one we need
 	}
-	
+
 	jobList, err := jm.ListJobs(jobFilter)
 	if err != nil {
 		return nil, fmt.Errorf("failed to find job with ID %s: %w", correlator, err)
 	}
-	
+
 	// Find the job with the specified job ID
 	for _, job := range jobList.Jobs {
 		if job.JobID == correlator {
 			return jm.GetJobByNameID(job.JobName, job.JobID)
 		}
 	}
-	
+
 	return nil, fmt.Errorf("job with ID %s not found", correlator)
 }
 
@@ -169,9 +169,9 @@ func (jm *ZOSMFJobManager) GetJobInfo(correlator string) (*JobInfo, error) {
 	if err != nil {
 		return nil, fmt.Errorf("invalid correlator format: %w", err)
 	}
-	
+
 	session := jm.session.(*profile.Session)
-	
+
 	// Build URL using jobname/jobid format
 	apiURL := session.GetBaseURL() + fmt.Sprintf(JobByNameIDEndpoint, url.PathEscape(jobName), url.PathEscape(jobID)) + JobFilesEndpoint
 
@@ -276,7 +276,7 @@ func (jm *ZOSMFJobManager) GetJobByCorrelator(correlator string) (*Job, error) {
 // SubmitJob submits a new job
 func (jm *ZOSMFJobManager) SubmitJob(request *SubmitJobRequest) (*SubmitJobResponse, error) {
 	session := jm.session.(*profile.Session)
-	
+
 	// Build URL
 	apiURL := session.GetBaseURL() + JobsEndpoint
 
@@ -284,7 +284,7 @@ func (jm *ZOSMFJobManager) SubmitJob(request *SubmitJobRequest) (*SubmitJobRespo
 	var requestBody []byte
 	var contentType string
 	var err error
-	
+
 	if request.JobStatement != "" {
 		// Submit job statement as plain text (z/OSMF expects JCL as text/plain for direct submission)
 		requestBody = []byte(request.JobStatement)
@@ -296,7 +296,7 @@ func (jm *ZOSMFJobManager) SubmitJob(request *SubmitJobRequest) (*SubmitJobRespo
 		if !strings.HasPrefix(datasetPath, "//") {
 			datasetPath = "//" + datasetPath
 		}
-		
+
 		body := map[string]interface{}{
 			"file": datasetPath,
 		}
@@ -365,7 +365,7 @@ func (jm *ZOSMFJobManager) SubmitJob(request *SubmitJobRequest) (*SubmitJobRespo
 // CancelJob cancels a running job
 func (jm *ZOSMFJobManager) CancelJob(correlator string) error {
 	session := jm.session.(*profile.Session)
-	
+
 	// Build URL
 	apiURL := session.GetBaseURL() + fmt.Sprintf(JobByCorrelatorEndpoint, url.PathEscape(correlator)) + CancelEndpoint
 
@@ -403,14 +403,14 @@ func (jm *ZOSMFJobManager) DeleteJob(correlator string) error {
 	if err != nil {
 		return fmt.Errorf("invalid correlator format: %w", err)
 	}
-	
+
 	return jm.DeleteJobByNameID(jobName, jobID)
 }
 
 // DeleteJobByNameID deletes a job using separate jobName and jobID
 func (jm *ZOSMFJobManager) DeleteJobByNameID(jobName, jobID string) error {
 	session := jm.session.(*profile.Session)
-	
+
 	// Build URL using jobName and jobID format
 	apiURL := session.GetBaseURL() + fmt.Sprintf(JobByNameIDEndpoint, url.PathEscape(jobName), url.PathEscape(jobID))
 
@@ -444,7 +444,7 @@ func (jm *ZOSMFJobManager) DeleteJobByNameID(jobName, jobID string) error {
 // GetSpoolFiles retrieves spool files for a job using jobname and jobid
 func (jm *ZOSMFJobManager) GetSpoolFiles(jobName, jobID string) ([]SpoolFile, error) {
 	session := jm.session.(*profile.Session)
-	
+
 	// Build URL using the correct z/OSMF format: /restjobs/jobs/{jobname}/{jobid}/files
 	apiURL := session.GetBaseURL() + fmt.Sprintf(JobByNameIDEndpoint, url.PathEscape(jobName), url.PathEscape(jobID)) + JobFilesEndpoint
 
@@ -484,7 +484,7 @@ func (jm *ZOSMFJobManager) GetSpoolFiles(jobName, jobID string) ([]SpoolFile, er
 // GetSpoolFileContent retrieves the content of a specific spool file
 func (jm *ZOSMFJobManager) GetSpoolFileContent(jobName, jobID string, spoolID int) (string, error) {
 	session := jm.session.(*profile.Session)
-	
+
 	// Build URL using the correct z/OSMF format: /restjobs/jobs/{jobname}/{jobid}/files/{id}/records
 	apiURL := session.GetBaseURL() + fmt.Sprintf(JobByNameIDEndpoint, url.PathEscape(jobName), url.PathEscape(jobID)) + fmt.Sprintf(JobFilesByIDEndpoint, strconv.Itoa(spoolID))
 
@@ -541,12 +541,10 @@ func (jm *ZOSMFJobManager) GetSpoolFileContentByCorrelator(correlator string, sp
 	return jm.GetSpoolFileContent(jobName, jobID, spoolID)
 }
 
-
-
 // PurgeJob purges a job (removes it from the system)
 func (jm *ZOSMFJobManager) PurgeJob(correlator string) error {
 	session := jm.session.(*profile.Session)
-	
+
 	// Build URL
 	apiURL := session.GetBaseURL() + fmt.Sprintf(JobByCorrelatorEndpoint, url.PathEscape(correlator)) + PurgeEndpoint
 
@@ -580,11 +578,11 @@ func (jm *ZOSMFJobManager) PurgeJob(correlator string) error {
 // CloseJobManager closes the job manager and its underlying HTTP connections
 func (jm *ZOSMFJobManager) CloseJobManager() error {
 	session := jm.session.(*profile.Session)
-	
+
 	// Close idle connections in the HTTP client
 	if client := session.GetHTTPClient(); client != nil {
 		client.CloseIdleConnections()
 	}
-	
+
 	return nil
 }

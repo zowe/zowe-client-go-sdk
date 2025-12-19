@@ -306,7 +306,7 @@ The Jobs package includes comprehensive tests covering:
 === RUN   TestGetJobsByStatus
 --- PASS: TestGetJobsByStatus (0.00s)
 PASS
-ok      github.com/ojuschugh1/zowe-client-go-sdk/pkg/jobs
+ok      github.com/zowe/zowe-client-go-sdk/pkg/jobs
 ```
 
 ## Integration with Profile Management

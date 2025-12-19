@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ojuschugh1/zowe-client-go-sdk/pkg/profile"
+	"github.com/zowe/zowe-client-go-sdk/pkg/profile"
 )
 
 // CreateDatasetManager creates a dataset manager from a profile manager
@@ -160,7 +160,7 @@ func (dm *ZOSMFDatasetManager) UploadTextToMemberWithValidation(datasetName, mem
 	if err != nil {
 		return fmt.Errorf("failed to get dataset information: %w", err)
 	}
-	
+
 	// Verify it's a partitioned dataset
 	if dsInfo.Type != "PO" && dsInfo.Type != "PO-E" {
 		return fmt.Errorf("dataset %s is not a partitioned dataset (type: %s)", datasetName, dsInfo.Type)
@@ -485,15 +485,15 @@ func (dm *ZOSMFDatasetManager) uploadWithRetry(request *UploadRequest, memberExi
 	const retryDelay = time.Second * 2
 
 	var lastError error
-	
+
 	for attempt := 1; attempt <= maxRetries; attempt++ {
 		err := dm.UploadContent(request)
 		if err == nil {
 			return nil // Success
 		}
-		
+
 		lastError = err
-		
+
 		// Check if this is a retryable error
 		errorStr := strings.ToLower(err.Error())
 		isRetryable := strings.Contains(errorStr, "isrz002") ||
@@ -502,19 +502,19 @@ func (dm *ZOSMFDatasetManager) uploadWithRetry(request *UploadRequest, memberExi
 			strings.Contains(errorStr, "directory") ||
 			strings.Contains(errorStr, "timeout") ||
 			strings.Contains(errorStr, "connection")
-		
+
 		if !isRetryable {
 			// Non-retryable error, fail immediately
 			return err
 		}
-		
+
 		if attempt < maxRetries {
 			// Wait before retry, with exponential backoff
 			waitTime := time.Duration(attempt) * retryDelay
 			time.Sleep(waitTime)
 		}
 	}
-	
+
 	return fmt.Errorf("upload failed after %d attempts: %w", maxRetries, lastError)
 }
 
@@ -523,7 +523,7 @@ func (dm *ZOSMFDatasetManager) CreatePDSWithDirectorySpace(name string, director
 	if directoryBlocks < 5 {
 		directoryBlocks = 10 // Minimum recommended directory blocks
 	}
-	
+
 	request := &CreateDatasetRequest{
 		Name: name,
 		Type: DatasetTypePartitioned,
@@ -557,7 +557,7 @@ func (dm *ZOSMFDatasetManager) CheckPDSDirectoryHealth(datasetName string) error
 	if err != nil {
 		return fmt.Errorf("failed to get dataset information: %w", err)
 	}
-	
+
 	// Verify it's a PDS
 	if dsInfo.Type != "PO" && dsInfo.Type != "PO-E" {
 		return fmt.Errorf("dataset %s is not a partitioned dataset (type: %s)", datasetName, dsInfo.Type)

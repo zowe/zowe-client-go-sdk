@@ -5,9 +5,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/ojuschugh1/zowe-client-go-sdk/pkg/datasets"
-	"github.com/ojuschugh1/zowe-client-go-sdk/pkg/jobs"
-	"github.com/ojuschugh1/zowe-client-go-sdk/pkg/profile"
+	"github.com/zowe/zowe-client-go-sdk/pkg/datasets"
+	"github.com/zowe/zowe-client-go-sdk/pkg/jobs"
+	"github.com/zowe/zowe-client-go-sdk/pkg/profile"
 )
 
 func main() {

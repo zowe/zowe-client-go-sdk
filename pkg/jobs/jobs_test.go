@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ojuschugh1/zowe-client-go-sdk/pkg/profile"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/zowe/zowe-client-go-sdk/pkg/profile"
 )
 
 // createTestProfile creates a profile for testing with the given server URL
@@ -19,7 +19,7 @@ func createTestProfile(serverURL string) *profile.ZOSMFProfile {
 	// Extract host and port from server URL
 	host := strings.TrimPrefix(serverURL, "http://")
 	host = strings.TrimPrefix(host, "https://")
-	
+
 	return &profile.ZOSMFProfile{
 		Name:               "test",
 		Host:               host,
@@ -74,7 +74,7 @@ func TestNewJobManagerFromProfile(t *testing.T) {
 func TestCreateJobManager(t *testing.T) {
 	// Create a test profile manager
 	pm := &profile.ZOSMFProfileManager{}
-	
+
 	// This should fail since we don't have a real profile
 	_, err := CreateJobManager(pm, "nonexistent")
 	assert.Error(t, err)
@@ -100,12 +100,12 @@ func TestListJobs(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "GET", r.Method)
 		assert.Equal(t, "/api/v1/restjobs/jobs", r.URL.Path)
-		
+
 		// Check query parameters
 		assert.Equal(t, "testuser", r.URL.Query().Get("owner"))
 		assert.Equal(t, "TEST", r.URL.Query().Get("prefix"))
 		assert.Equal(t, "10", r.URL.Query().Get("max-jobs"))
-		
+
 		// Return mock response
 		response := JobList{
 			Jobs: []Job{
@@ -123,7 +123,7 @@ func TestListJobs(t *testing.T) {
 				},
 			},
 		}
-		
+
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(response)
 	}))
@@ -157,7 +157,7 @@ func TestGetJob(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "GET", r.Method)
 		assert.Equal(t, "/api/v1/restjobs/jobs/TESTJOB1/JOB001", r.URL.Path)
-		
+
 		// Return mock response
 		job := Job{
 			JobID:   "JOB001",
@@ -166,7 +166,7 @@ func TestGetJob(t *testing.T) {
 			Status:  "OUTPUT",
 			RetCode: "CC 0000",
 		}
-		
+
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(job)
 	}))
@@ -195,7 +195,7 @@ func TestGetJobStatus(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "GET", r.Method)
 		assert.Equal(t, "/api/v1/restjobs/jobs/TESTJOB1/JOB001", r.URL.Path)
-		
+
 		// Return mock response
 		job := Job{
 			JobID:   "JOB001",
@@ -203,7 +203,7 @@ func TestGetJobStatus(t *testing.T) {
 			Owner:   "testuser",
 			Status:  "OUTPUT",
 		}
-		
+
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(job)
 	}))
@@ -228,12 +228,12 @@ func TestSubmitJob(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "PUT", r.Method)
 		assert.Equal(t, "/api/v1/restjobs/jobs", r.URL.Path)
-		
+
 		// Parse request body (should be plain text for JCL)
 		body, _ := io.ReadAll(r.Body)
 		assert.Equal(t, "//TESTJOB JOB (ACCT),'USER',MSGCLASS=A", string(body))
 		assert.Equal(t, "text/plain", r.Header.Get("Content-Type"))
-		
+
 		// Return mock response
 		response := SubmitJobResponse{
 			JobID:   "JOB001",
@@ -241,7 +241,7 @@ func TestSubmitJob(t *testing.T) {
 			Owner:   "testuser",
 			Status:  "ACTIVE",
 		}
-		
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(response)
@@ -274,7 +274,7 @@ func TestSubmitJobStatement(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "PUT", r.Method)
 		assert.Equal(t, "/api/v1/restjobs/jobs", r.URL.Path)
-		
+
 		// Return mock response
 		response := SubmitJobResponse{
 			JobID:   "JOB001",
@@ -282,7 +282,7 @@ func TestSubmitJobStatement(t *testing.T) {
 			Owner:   "testuser",
 			Status:  "ACTIVE",
 		}
-		
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(response)
@@ -308,7 +308,7 @@ func TestSubmitJobFromDataset(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "PUT", r.Method)
 		assert.Equal(t, "/api/v1/restjobs/jobs", r.URL.Path)
-		
+
 		// Return mock response
 		response := SubmitJobResponse{
 			JobID:   "JOB001",
@@ -316,7 +316,7 @@ func TestSubmitJobFromDataset(t *testing.T) {
 			Owner:   "testuser",
 			Status:  "ACTIVE",
 		}
-		
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(response)
@@ -342,7 +342,7 @@ func TestCancelJob(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "PUT", r.Method)
 		assert.Equal(t, "/api/v1/restjobs/jobs/JOB001/cancel", r.URL.Path)
-		
+
 		w.WriteHeader(http.StatusNoContent)
 	}))
 	defer server.Close()
@@ -365,7 +365,7 @@ func TestDeleteJob(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "DELETE", r.Method)
 		assert.Equal(t, "/api/v1/restjobs/jobs/TESTJOB1/JOB001", r.URL.Path)
-		
+
 		w.WriteHeader(http.StatusNoContent)
 	}))
 	defer server.Close()
@@ -388,7 +388,7 @@ func TestGetSpoolFiles(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "GET", r.Method)
 		assert.Equal(t, "/api/v1/restjobs/jobs/TESTJOB/JOB001/files", r.URL.Path)
-		
+
 		// Return mock response
 		spoolFiles := []SpoolFile{
 			{
@@ -404,7 +404,7 @@ func TestGetSpoolFiles(t *testing.T) {
 				Bytes:   500,
 			},
 		}
-		
+
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(spoolFiles)
 	}))
@@ -433,7 +433,7 @@ func TestGetSpoolFileContent(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "GET", r.Method)
 		assert.Equal(t, "/api/v1/restjobs/jobs/TESTJOB/JOB001/files/1/records", r.URL.Path)
-		
+
 		// Return mock content
 		w.Header().Set("Content-Type", "text/plain")
 		w.Write([]byte("JES2 JOB LOG OUTPUT"))
@@ -459,7 +459,7 @@ func TestPurgeJob(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "PUT", r.Method)
 		assert.Equal(t, "/api/v1/restjobs/jobs/JOB001/purge", r.URL.Path)
-		
+
 		w.WriteHeader(http.StatusNoContent)
 	}))
 	defer server.Close()
@@ -528,8 +528,8 @@ func TestIsValidDatasetName(t *testing.T) {
 	assert.True(t, isValidDatasetName("A@B#C$D-E.F"))
 
 	// Test invalid dataset names
-	assert.False(t, isValidDatasetName("")) // Empty
-	assert.False(t, isValidDatasetName("1TEST.DATASET")) // Starts with number
+	assert.False(t, isValidDatasetName(""))                                                                      // Empty
+	assert.False(t, isValidDatasetName("1TEST.DATASET"))                                                         // Starts with number
 	assert.False(t, isValidDatasetName("TEST.DATASET.WITH.TOO.MANY.QUALIFIERS.THAT.EXCEEDS.THE.MAXIMUM.LENGTH")) // Too long
 }
 
@@ -552,7 +552,7 @@ func TestCreateJobWithStep(t *testing.T) {
 	}
 
 	job := CreateJobWithStep("TESTJOB", "ACCT", "USER", "A", "(1,1)", "STEP1", "IEFBR14", ddStatements)
-	
+
 	expected := "//TESTJOB JOB (ACCT),'USER',MSGCLASS=A,MSGLEVEL=(1,1)\n//STEP1 EXEC PGM=IEFBR14\n//DD1 DD DSN=TEST.DATA,DISP=SHR\n//DD2 DD SYSOUT=A\n"
 	assert.Equal(t, expected, job)
 }
@@ -564,7 +564,7 @@ func TestGetJobsByOwner(t *testing.T) {
 		assert.Equal(t, "/api/v1/restjobs/jobs", r.URL.Path)
 		assert.Equal(t, "testuser", r.URL.Query().Get("owner"))
 		assert.Equal(t, "10", r.URL.Query().Get("max-jobs"))
-		
+
 		// Return mock response
 		response := JobList{
 			Jobs: []Job{
@@ -576,7 +576,7 @@ func TestGetJobsByOwner(t *testing.T) {
 				},
 			},
 		}
-		
+
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(response)
 	}))
@@ -604,7 +604,7 @@ func TestGetJobsByPrefix(t *testing.T) {
 		assert.Equal(t, "/api/v1/restjobs/jobs", r.URL.Path)
 		assert.Equal(t, "TEST", r.URL.Query().Get("prefix"))
 		assert.Equal(t, "5", r.URL.Query().Get("max-jobs"))
-		
+
 		// Return mock response
 		response := JobList{
 			Jobs: []Job{
@@ -616,7 +616,7 @@ func TestGetJobsByPrefix(t *testing.T) {
 				},
 			},
 		}
-		
+
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(response)
 	}))
@@ -644,7 +644,7 @@ func TestGetJobsByStatus(t *testing.T) {
 		assert.Equal(t, "/api/v1/restjobs/jobs", r.URL.Path)
 		assert.Equal(t, "OUTPUT", r.URL.Query().Get("status"))
 		assert.Equal(t, "20", r.URL.Query().Get("max-jobs"))
-		
+
 		// Return mock response
 		response := JobList{
 			Jobs: []Job{
@@ -656,7 +656,7 @@ func TestGetJobsByStatus(t *testing.T) {
 				},
 			},
 		}
-		
+
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(response)
 	}))
@@ -901,18 +901,18 @@ func TestSubmitJobWithAllSources(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "PUT", r.Method)
 		assert.Equal(t, "/api/v1/restjobs/jobs", r.URL.Path)
-		
+
 		// Parse request body
 		var requestBody map[string]interface{}
 		json.NewDecoder(r.Body).Decode(&requestBody)
-		
+
 		response := SubmitJobResponse{
 			JobID:   "JOB001",
 			JobName: "TESTJOB",
 			Owner:   "testuser",
 			Status:  "INPUT",
 		}
-		
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(response)
@@ -950,7 +950,7 @@ func TestListJobsWithAllFilters(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "GET", r.Method)
 		assert.Equal(t, "/api/v1/restjobs/jobs", r.URL.Path)
-		
+
 		// Check all query parameters
 		assert.Equal(t, "testuser", r.URL.Query().Get("owner"))
 		assert.Equal(t, "TEST", r.URL.Query().Get("prefix"))
@@ -959,7 +959,7 @@ func TestListJobsWithAllFilters(t *testing.T) {
 		assert.Equal(t, "TESTJOB", r.URL.Query().Get("jobname"))
 		assert.Equal(t, "OUTPUT", r.URL.Query().Get("status"))
 		assert.Equal(t, "CORRELATOR", r.URL.Query().Get("user-correlator"))
-		
+
 		response := JobList{
 			Jobs: []Job{
 				{
@@ -970,7 +970,7 @@ func TestListJobsWithAllFilters(t *testing.T) {
 				},
 			},
 		}
-		
+
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(response)
 	}))
@@ -984,15 +984,15 @@ func TestListJobsWithAllFilters(t *testing.T) {
 
 	// Test with all filters
 	filter := &JobFilter{
-		Owner:           "testuser",
-		Prefix:          "TEST",
-		MaxJobs:         10,
-		JobID:           "JOB001",
-		JobName:         "TESTJOB",
-		Status:          "OUTPUT",
-		UserCorrelator:  "CORRELATOR",
+		Owner:          "testuser",
+		Prefix:         "TEST",
+		MaxJobs:        10,
+		JobID:          "JOB001",
+		JobName:        "TESTJOB",
+		Status:         "OUTPUT",
+		UserCorrelator: "CORRELATOR",
 	}
-	
+
 	jobList, err := jm.ListJobs(filter)
 	require.NoError(t, err)
 	assert.Len(t, jobList.Jobs, 1)
@@ -1004,14 +1004,14 @@ func TestGetJobInfo(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "GET", r.Method)
 		assert.Equal(t, "/api/v1/restjobs/jobs/TESTJOB1/JOB001/files", r.URL.Path)
-		
+
 		response := JobInfo{
 			JobID:   "JOB001",
 			JobName: "TESTJOB",
 			Owner:   "testuser",
 			Status:  "OUTPUT",
 		}
-		
+
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(response)
 	}))

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/ojuschugh1/zowe-client-go-sdk/pkg/jobs"
-	"github.com/ojuschugh1/zowe-client-go-sdk/pkg/profile"
+	"github.com/zowe/zowe-client-go-sdk/pkg/jobs"
+	"github.com/zowe/zowe-client-go-sdk/pkg/profile"
 )
 
 func main() {
@@ -209,7 +209,7 @@ func demonstrateJobManagement(jm *jobs.ZOSMFJobManager) {
 	fmt.Println("\n16. Waiting for job completion:")
 	fmt.Println("   (This would wait for a job to complete if connected to a real mainframe)")
 	fmt.Println("   For demonstration, showing the timeout and polling logic:")
-	
+
 	// This would be used in a real scenario:
 	// status, err := jm.WaitForJobCompletion("JOB001", 5*time.Minute, 10*time.Second)
 	// if err != nil {

@@ -4,19 +4,19 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/ojuschugh1/zowe-client-go-sdk/pkg/profile"
-	"github.com/ojuschugh1/zowe-client-go-sdk/pkg/datasets"
+	"github.com/zowe/zowe-client-go-sdk/pkg/datasets"
+	"github.com/zowe/zowe-client-go-sdk/pkg/profile"
 )
 
 func main() {
 	fmt.Println("=== Dataset Information Example ===")
-	
+
 	// Create a profile for your z/OS system
 	zosmfProfile := &profile.ZOSMFProfile{
-		Host:     "your-zos-host",
-		Port:     443,
-		User:     "your-user",
-		Password: "your-password",
+		Host:               "your-zos-host",
+		Port:               443,
+		User:               "your-user",
+		Password:           "your-password",
 		RejectUnauthorized: false,
 	}
 
@@ -30,7 +30,7 @@ func main() {
 	// Example 1: Get information about a specific dataset
 	datasetName := "YOUR.DATASET.NAME"
 	fmt.Printf("Getting information for dataset: %s\n", datasetName)
-	
+
 	info, err := dm.GetDatasetInfo(datasetName)
 	if err != nil {
 		log.Printf("Failed to get dataset info: %v", err)

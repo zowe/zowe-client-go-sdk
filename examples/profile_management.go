@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"log"
-	
-	"github.com/ojuschugh1/zowe-client-go-sdk/pkg/profile"
+
+	"github.com/zowe/zowe-client-go-sdk/pkg/profile"
 )
 
 func main() {
@@ -56,7 +56,7 @@ func main() {
 
 	// Example 4: Create sessions from profiles
 	fmt.Println("\n4. Creating sessions from profiles:")
-	
+
 	// Session from programmatic profile
 	session1, err := zosmfProfile.NewSession()
 	if err != nil {
@@ -103,7 +103,7 @@ func main() {
 		Name: "invalid",
 		// Missing required fields
 	}
-	
+
 	err = profile.ValidateProfile(invalidProfile)
 	if err != nil {
 		fmt.Printf("   Validation error: %v\n", err)
@@ -116,7 +116,7 @@ func main() {
 		User:     "validuser",
 		Password: "validpass",
 	}
-	
+
 	err = profile.ValidateProfile(validProfile)
 	if err == nil {
 		fmt.Printf("   Profile validation passed\n")
@@ -128,9 +128,9 @@ func main() {
 	cloned := profile.CloneProfile(original)
 	cloned.Name = "cloned"
 	cloned.Host = "cloned.example.com"
-	
+
 	fmt.Printf("   Original: %s (%s)\n", original.Name, original.Host)
 	fmt.Printf("   Cloned: %s (%s)\n", cloned.Name, cloned.Host)
 
 	fmt.Println("\nProfile management example completed!")
-} 
+}

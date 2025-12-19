@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ojuschugh1/zowe-client-go-sdk/pkg/profile"
+	"github.com/zowe/zowe-client-go-sdk/pkg/profile"
 )
 
 // parseCorrelator parses "jobname:jobid" into separate parts
@@ -65,7 +65,7 @@ func (jm *ZOSMFJobManager) SubmitJobFromDataset(dataset string, volume string) (
 	// Ensure dataset name is properly formatted for z/OSMF
 	// Remove any existing "//" prefix to ensure consistency
 	dataset = strings.TrimPrefix(dataset, "//")
-	
+
 	// z/OSMF automatically adds the user prefix, so we should use relative dataset names
 	// If the dataset name starts with the user ID, remove it to avoid duplication
 	// This is a common pattern in z/OSMF APIs
@@ -74,7 +74,7 @@ func (jm *ZOSMFJobManager) SubmitJobFromDataset(dataset string, volume string) (
 	if strings.HasPrefix(dataset, userID+".") {
 		dataset = strings.TrimPrefix(dataset, userID+".")
 	}
-	
+
 	request := &SubmitJobRequest{
 		JobDataSet: dataset,
 		Volume:     volume,
@@ -95,7 +95,7 @@ func (jm *ZOSMFJobManager) SubmitJobFromLocalFile(localFile, directory, extensio
 // WaitForJobCompletion waits for a job to complete and returns the final status
 func (jm *ZOSMFJobManager) WaitForJobCompletion(correlator string, timeout time.Duration, pollInterval time.Duration) (string, error) {
 	startTime := time.Now()
-	
+
 	for {
 		// Check if timeout exceeded
 		if time.Since(startTime) > timeout {
@@ -122,7 +122,7 @@ func (jm *ZOSMFJobManager) WaitForJobCompletion(correlator string, timeout time.
 func isJobComplete(status string) bool {
 	completedStatuses := []string{"OUTPUT", "CC 0000", "CC 0001", "CC 0002", "CC 0003", "CC 0004", "ABEND"}
 	status = strings.ToUpper(status)
-	
+
 	for _, completedStatus := range completedStatuses {
 		if strings.Contains(status, completedStatus) {
 			return true
@@ -162,7 +162,7 @@ func (jm *ZOSMFJobManager) GetJobsByStatus(status string, maxJobs int) (*JobList
 func (jm *ZOSMFJobManager) GetJobOutput(correlator string) (map[string]string, error) {
 	var jobName, jobID string
 	var err error
-	
+
 	// Check if it's already in correlator format (jobname:jobid)
 	if strings.Contains(correlator, ":") {
 		// Parse correlator to get jobname and jobid
@@ -173,15 +173,15 @@ func (jm *ZOSMFJobManager) GetJobOutput(correlator string) (map[string]string, e
 	} else {
 		// If it's just a job ID, we need to find the job first
 		jobFilter := &JobFilter{
-			JobID: correlator,
+			JobID:   correlator,
 			MaxJobs: 100,
 		}
-		
+
 		jobList, err := jm.ListJobs(jobFilter)
 		if err != nil {
 			return nil, fmt.Errorf("failed to find job with ID %s: %w", correlator, err)
 		}
-		
+
 		// Find the job with the specified job ID
 		found := false
 		for _, job := range jobList.Jobs {
@@ -192,7 +192,7 @@ func (jm *ZOSMFJobManager) GetJobOutput(correlator string) (map[string]string, e
 				break
 			}
 		}
-		
+
 		if !found {
 			return nil, fmt.Errorf("job with ID %s not found", correlator)
 		}
@@ -222,7 +222,7 @@ func (jm *ZOSMFJobManager) GetJobOutput(correlator string) (map[string]string, e
 func (jm *ZOSMFJobManager) GetJobOutputByDDName(correlator, ddName string) (string, error) {
 	var jobName, jobID string
 	var err error
-	
+
 	// Check if it's already in correlator format (jobname:jobid)
 	if strings.Contains(correlator, ":") {
 		// Parse correlator to get jobname and jobid
@@ -233,15 +233,15 @@ func (jm *ZOSMFJobManager) GetJobOutputByDDName(correlator, ddName string) (stri
 	} else {
 		// If it's just a job ID, we need to find the job first
 		jobFilter := &JobFilter{
-			JobID: correlator,
+			JobID:   correlator,
 			MaxJobs: 100,
 		}
-		
+
 		jobList, err := jm.ListJobs(jobFilter)
 		if err != nil {
 			return "", fmt.Errorf("failed to find job with ID %s: %w", correlator, err)
 		}
-		
+
 		// Find the job with the specified job ID
 		found := false
 		for _, job := range jobList.Jobs {
@@ -252,7 +252,7 @@ func (jm *ZOSMFJobManager) GetJobOutputByDDName(correlator, ddName string) (stri
 				break
 			}
 		}
-		
+
 		if !found {
 			return "", fmt.Errorf("job with ID %s not found", correlator)
 		}
@@ -355,25 +355,25 @@ func CreateSimpleJobStatement(jobName, account, user, msgClass, msgLevel string)
 		msgLevel = "(1,1)"
 	}
 
-	return fmt.Sprintf("//%s JOB (%s),'%s',MSGCLASS=%s,MSGLEVEL=%s", 
+	return fmt.Sprintf("//%s JOB (%s),'%s',MSGCLASS=%s,MSGLEVEL=%s",
 		jobName, account, user, msgClass, msgLevel)
 }
 
 // CreateJobWithStep creates a complete JCL job with a step
 func CreateJobWithStep(jobName, account, user, msgClass, msgLevel, stepName, pgm string, ddStatements []string) string {
 	jobStatement := CreateSimpleJobStatement(jobName, account, user, msgClass, msgLevel)
-	
+
 	jcl := jobStatement + "\n"
-	
+
 	if stepName == "" {
 		stepName = "STEP1"
 	}
-	
+
 	jcl += fmt.Sprintf("//%s EXEC PGM=%s\n", stepName, pgm)
-	
+
 	for _, ddStatement := range ddStatements {
 		jcl += ddStatement + "\n"
 	}
-	
+
 	return jcl
 }

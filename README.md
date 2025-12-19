@@ -16,7 +16,7 @@ A Go SDK for the Zowe framework that provides programmatic APIs to perform basic
 ## Installation
 
 ```bash
-go get github.com/ojuschugh1/zowe-client-go-sdk
+go get github.com/zowe/zowe-client-go-sdk
 ```
 
 ## Quick Start
@@ -28,9 +28,9 @@ import (
     "fmt"
     "log"
     
-    "github.com/ojuschugh1/zowe-client-go-sdk/pkg/profile"
-    "github.com/ojuschugh1/zowe-client-go-sdk/pkg/jobs"
-    "github.com/ojuschugh1/zowe-client-go-sdk/pkg/datasets"
+    "github.com/zowe/zowe-client-go-sdk/pkg/profile"
+    "github.com/zowe/zowe-client-go-sdk/pkg/jobs"
+    "github.com/zowe/zowe-client-go-sdk/pkg/datasets"
 )
 
 func main() {
